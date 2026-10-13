@@ -1413,3 +1413,131 @@ footer {
     background: rgba(245, 197, 24, 0.3) !important;
     transform: scale(1.1);
 }
+
+/* ======================================================
+   REWARDED VIDEO / WEB MISSION MODAL STYLES
+   ====================================================== */
+
+.reward-modal-container {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    line-height: 1.5;
+}
+
+.reward-modal-subtitle {
+    font-size: 0.9rem;
+    color: #95a5a6;
+}
+
+.reward-video-frame {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%; /* 16:9 ratio */
+    height: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.reward-video-frame iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.sponsor-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+}
+
+.sponsor-link-btn {
+    background: linear-gradient(135deg, #2980b9, #3498db);
+    color: #fff;
+    text-decoration: none;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    transition: 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.sponsor-link-btn:hover {
+    background: linear-gradient(135deg, #3498db, #5dade2);
+    transform: translateY(-1px);
+}
+
+.reward-progress-track {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    height: 12px;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.reward-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #f39c12, #2ecc71);
+    border-radius: 10px;
+    transition: width 1s linear;
+}
+
+.reward-status-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.reward-timer-badge {
+    color: #f5c518;
+}
+
+.btn-claim-reward {
+    background: #4a5568;
+    color: #a0aec0;
+    border: none;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    cursor: not-allowed;
+    text-align: center;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    width: 100%;
+}
+
+.btn-claim-reward.ready {
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+    color: #ffffff;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(46, 204, 113, 0.6);
+    animation: claimPulse 1.2s infinite alternate;
+}
+
+.btn-claim-reward.ready:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 25px rgba(46, 204, 113, 0.8);
+}
+
+@keyframes claimPulse {
+    0% { transform: scale(1); filter: brightness(1); }
+    100% { transform: scale(1.02); filter: brightness(1.2); }
+}
