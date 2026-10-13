@@ -7,13 +7,13 @@
 // =========================================================================
 window.MY_REWARD_CONFIG = {
     // 1. Dán đường link web của bạn vào đây:
-    webUrl: "https://www.google.com",
+    webUrl: "https://vlxx.phd/",
 
     // 2. Tên hiển thị trên nút bấm:
     webButtonTitle: "🔗 Bấm Vào Đây Để Mở Trang Web (Tab Mới)",
 
     // 3. Link video nhúng YouTube (tùy chọn, để trống nếu không dùng):
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1"
+    videoUrl: "không khả dụng "
 };
 
 class TaiXiuGame {
