@@ -439,8 +439,11 @@ def create_app():
 
     # Routes
     app.router.add_get('/ws', ws_handler)
+    async def index_file(request):
+        return web.FileResponse(os.path.join(DIRECTORY, 'index.html'))
+    app.router.add_get('/', index_file)
     # Serve static directory
-    app.router.add_static('/', DIRECTORY, show_index=True)
+    app.router.add_static('/', DIRECTORY, show_index=False)
     return app
 
 if __name__ == "__main__":
