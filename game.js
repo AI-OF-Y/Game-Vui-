@@ -13,7 +13,7 @@ window.MY_REWARD_CONFIG = {
     webButtonTitle: "🔗 Bấm Vào Đây Để Mở Trang Web (Tab Mới)",
 
     // 3. Link video nhúng YouTube (tùy chọn, để trống nếu không dùng):
-    videoUrl: "không khả dụng "
+    videoUrl: "không khả dụng"
 };
 
 class TaiXiuGame {
