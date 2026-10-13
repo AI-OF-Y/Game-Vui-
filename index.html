@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tài Xỉu Hoàng Gia - Giải Trí Vui Minh Bạch (Provably Fair)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Thông báo pháp lý & Tính chất giải trí -->
+    <div class="disclaimer-banner">
+        <span>🛡️</span>
+        <span>TRÒ CHƠI GIẢI TRÍ VUI 100% - KHÔNG CƯỢC TIỀN THẬT - ĐIỂM ẢO KHÔNG CÓ GIÁ TRỊ QUY ĐỔI - TUÂN THỦ PHÁP LUẬT VIỆT NAM</span>
+    </div>
+
+    <!-- Header & Ví điểm ảo -->
+    <header>
+        <div class="brand">
+            <span class="brand-icon">🎲</span>
+            <div>
+                <h1 class="brand-title">TÀI XỈU HOÀNG GIA</h1>
+                <span class="brand-badge">Bản Chơi Vui Minh Bạch</span>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <!-- Ví ảo -->
+            <div class="wallet-card" title="Số Xu vui của bạn">
+                <span class="coin-icon">🪙</span>
+                <span id="walletBalance" class="wallet-balance">50,000</span>
+                <span style="font-size:0.8rem;color:#f5c518;font-weight:600;">Xu</span>
+            </div>
+
+            <!-- Nút cứu trợ xu -->
+            <button id="btnRefill" class="btn-refill" title="Nhận 10,000 Xu miễn phí">
+                <span>➕</span> Nhận Xu Cứu Trợ
+            </button>
+
+            <!-- Nút âm thanh -->
+            <button id="soundToggle" class="btn-action-icon" title="Bật/Tắt âm thanh">🔊</button>
+
+            <!-- Hướng dẫn -->
+            <button id="helpBtn" class="btn-action-icon" title="Xem luật chơi">❓</button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container">
+
+        <!-- Thanh thông tin phiên & Dữ liệu ngẫu nhiên công khai từ Web -->
+        <section class="round-bar">
+            <div class="round-info-group">
+                <span id="roundIdText" style="font-weight:700;color:#f5c518;">Phiên #Khởi tạo</span>
+                <div class="badge-live">
+                    <span class="live-dot"></span>
+                    <span id="sourceBadge">🟢 Web Drand Live</span>
+                </div>
+            </div>
+
+            <button id="verifyBtn" class="data-source-btn">
+                🔍 Minh Bạch Dữ Liệu Công Khai (Provably Fair)
+            </button>
+        </section>
+
+        <!-- THANH BÀN CHƠI ĐỒNG BỘ MULTIPLAYER -->
+        <section class="multiplayer-bar" id="multiplayerBar">
+            <div class="profile-group">
+                <span id="connStatusBadge" style="font-weight:700;font-size:0.85rem;color:#2ecc71;">
+                    <span class="live-dot" style="background:#2ecc71;"></span> 🟢 Đang kết nối bàn trực tuyến
+                </span>
+                <div class="my-profile-chip">
+                    <span id="myAvatar">🐯</span>
+                    <span id="myNickname">Bạn</span>
+                    <button id="btnEditProfile" class="btn-edit-profile" title="Đổi tên & avatar">✏️ Đổi tên</button>
+                </div>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                <span style="font-size:0.8rem;color:#95a5a6;">Người chơi online (<span id="onlineCount" style="color:#ffd700;font-weight:700;">1</span>):</span>
+                <div class="online-players-scroll" id="onlinePlayersContainer"></div>
+            </div>
+        </section>
+
+        <!-- KHU VỰC BÀN XÓC ĐĨA & BÁT ÚP -->
+        <section class="game-arena">
+            <!-- Chọn chế độ chơi -->
+            <div class="mode-selector">
+                <button id="modeManual" class="mode-btn active">Chế Độ Tự Lắc</button>
+                <button id="modeAuto" class="mode-btn">Chế Độ Sòng Bài (25s)</button>
+            </div>
+
+            <!-- Đếm ngược thời gian nếu ở chế độ tự động -->
+            <div id="timerDisplay" class="timer-display" style="display:none;">
+                <span>⏳ Thời gian cược:</span>
+                <span id="timerSeconds" class="timer-seconds">20</span>
+                <span>giây</span>
+            </div>
+
+            <!-- Hiển thị kết quả công bố -->
+            <div id="resultDisplay" class="result-display"></div>
+
+            <!-- BÁT VÀ ĐĨA XÚC XẮC -->
+            <div class="bowl-container" id="bowlContainer">
+                <!-- Đĩa đựng xúc xắc -->
+                <div class="plate">
+                    <div class="plate-pattern"></div>
+                    <div class="dice-stage">
+                        <div class="dice dice-1" id="dice1"></div>
+                        <div class="dice dice-2" id="dice2"></div>
+                        <div class="dice dice-3" id="dice3"></div>
+                    </div>
+                </div>
+
+                <!-- Bát úp (Có thể kéo rê để nặn từ từ hoặc bấm mở) -->
+                <div class="bowl-lid" id="bowlLid" title="Kéo rê nắp bát ra từ từ để nặn xúc xắc!">
+                    <div class="bowl-lid-handle"></div>
+                    <span class="bowl-lid-text">KÉO MỞ BÁT</span>
+                    <span style="font-size:0.65rem;color:#5a4306;font-weight:700;margin-top:2px;">(Nặn Xúc Xắc)</span>
+                </div>
+            </div>
+
+            <!-- Nút bấm tương tác -->
+            <div class="action-controls">
+                <button id="btnShake" class="btn-main btn-shake">
+                    <span>🎲</span> Xóc Đĩa
+                </button>
+                <button id="btnOpen" class="btn-main btn-open" disabled>
+                    <span>✨</span> Mở Bát
+                </button>
+                <button id="btnClear" class="btn-main btn-clear">
+                    <span>🔄</span> Huỷ Cược
+                </button>
+            </div>
+        </section>
+
+        <!-- THANH CHỌN MỆNH GIÁ PHỈNH CƯỢC (CHIPS) -->
+        <section class="chip-bar">
+            <span class="chip-label">CHỌN PHỈNH:</span>
+            <div class="chips-list">
+                <div class="chip chip-100" data-val="100">100</div>
+                <div class="chip chip-500" data-val="500">500</div>
+                <div class="chip chip-1k active" data-val="1000">1K</div>
+                <div class="chip chip-5k" data-val="5000">5K</div>
+                <div class="chip chip-10k" data-val="10000">10K</div>
+                <div class="chip chip-50k" data-val="50000">50K</div>
+            </div>
+        </section>
+
+        <!-- BẢNG ĐẶT CƯỢC CHÍNH -->
+        <section class="betting-board">
+            <!-- 2 CỬA CHÍNH: TÀI & XỈU -->
+            <div class="main-bets-grid">
+                <!-- Cửa XỈU -->
+                <div class="bet-box bet-box-xiu" data-bet="xiu">
+                    <div class="bet-title">XỈU</div>
+                    <div class="bet-range">Tổng 4 - 10</div>
+                    <div class="bet-rate">1 Ăn 1</div>
+                    <div class="table-bet-info">Toàn bàn: <span id="tableBetXiu">0</span> Xu</div>
+                    <div class="placed-bet-badge"></div>
+                </div>
+
+                <!-- Cửa TÀI -->
+                <div class="bet-box bet-box-tai" data-bet="tai">
+                    <div class="bet-title">TÀI</div>
+                    <div class="bet-range">Tổng 11 - 17</div>
+                    <div class="bet-rate">1 Ăn 1</div>
+                    <div class="table-bet-info">Toàn bàn: <span id="tableBetTai">0</span> Xu</div>
+                    <div class="placed-bet-badge"></div>
+                </div>
+            </div>
+
+            <!-- CÁC CỬA PHỤ: CHẴN, BÃO BẤT KỲ, LẺ -->
+            <div class="secondary-bets-grid">
+                <div class="bet-box" data-bet="chan">
+                    <div class="bet-title">CHẴN</div>
+                    <div class="bet-range">Tổng số chẵn</div>
+                    <div class="bet-rate">1 Ăn 1</div>
+                    <div class="table-bet-info">Toàn bàn: <span id="tableBetChan">0</span> Xu</div>
+                    <div class="placed-bet-badge"></div>
+                </div>
+
+                <div class="bet-box" data-bet="bao" style="border-top: 4px solid #f1c40f;">
+                    <div class="bet-title" style="color:#f5c518;">BÃO BẤT KỲ</div>
+                    <div class="bet-range">3 Viên Cùng Số</div>
+                    <div class="bet-rate" style="color:#ffd700;font-weight:700;">1 ĂN 30</div>
+                    <div class="table-bet-info">Toàn bàn: <span id="tableBetBao">0</span> Xu</div>
+                    <div class="placed-bet-badge"></div>
+                </div>
+
+                <div class="bet-box" data-bet="le">
+                    <div class="bet-title">LẺ</div>
+                    <div class="bet-range">Tổng số lẻ</div>
+                    <div class="bet-rate">1 Ăn 1</div>
+                    <div class="table-bet-info">Toàn bàn: <span id="tableBetLe">0</span> Xu</div>
+                    <div class="placed-bet-badge"></div>
+                </div>
+            </div>
+
+            <!-- CƯỢC TỔNG ĐIỂM CHÍNH XÁC (4 -> 17) -->
+            <div class="points-bet-section">
+                <div class="points-header">
+                    <span style="font-weight:700;color:#fff;">🎯 CƯỢC TỔNG ĐIỂM CHÍNH XÁC</span>
+                    <span>Tỷ lệ lên tới 1 Ăn 60</span>
+                </div>
+                <div class="points-grid">
+                    <div class="point-btn" data-point="4">
+                        <span class="point-num">4</span>
+                        <span class="point-multiplier">1:60</span>
+                        <span class="point-placed"></span>
+                    </div>
+                    <div class="point-btn" data-point="5">
+                        <span class="point-num">5</span>
+                        <span class="point-multiplier">1:30</span>
+                        <span class="point-placed"></span>
+                    </div>
+                    <div class="point-btn" data-point="6">
+                        <span class="point-num">6</span>
+                        <span class="point-multiplier">1:18</span>
+                        <span class="point-placed"></span>
+                    </div>
+                    <div class="point-btn" data-point="7">
+                        <span class="point-num">7</span>
+                        <span class="point-multiplier">1:12</span>
+                        <span class="point-placed"></span>
+                    </div>
+                    <div class="point-btn" data-point="8">
+                        <span class="point-num">8</span>
+                        <span class="point-multiplier">1:8</span>
+                        <span class="point-placed"></span>
+                    </div>
+                    <div class="point-btn" data-point="9">
+                        <span class="point-num">9</span>
+                        <span class="point-multiplier">1:6</span>
+                        <span class="point-placed"></span>
+                    </div>
+                    <div class="point-btn" data-point="10">
+                        <span class="point-num">10</span>
+                        <span class="point-multiplier">1:6</span>
+                        <span class="point-placed"></span>
+                    </div>
+                    <div class="point-btn" data-point="11">
+                        <span class="point-num">11</span>
+                        <span class="point-multiplier">1:6</span>
+                        <span class="point-placed"></span>
+                    </div>
+                    <div class="point-btn" data-point="12">
+                        <span class="point-num">12</span>
+                        <span class="point-multiplier">1:6</span>
+                        <span class="point-placed"></span>
+                    </div>
+                    <div class="point-btn" data-point="13">
+                        <span class="point-num">13</span>
+                        <span class="point-multiplier">1:8</span>
+                        <span class="point-placed"></span>
+                    </div>
+                    <div class="point-btn" data-point="14">
+                        <span class="point-num">14</span>
+                        <span class="point-multiplier">1:12</span>
+                        <span class="point-placed"></span>
+                    </div>
+                    <div class="point-btn" data-point="15">
+                        <span class="point-num">15</span>
+                        <span class="point-multiplier">1:18</span>
+                        <span class="point-placed"></span>
+                    </div>
+                    <div class="point-btn" data-point="16">
+                        <span class="point-num">16</span>
+                        <span class="point-multiplier">1:30</span>
+                        <span class="point-placed"></span>
+                    </div>
+                    <div class="point-btn" data-point="17">
+                        <span class="point-num">17</span>
+                        <span class="point-multiplier">1:60</span>
+                        <span class="point-placed"></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BẢNG SOI CẦU & THỐNG KÊ (ROADMAP) -->
+        <section class="roadmap-section">
+            <div class="roadmap-header">
+                <div class="roadmap-title">
+                    <span>📊</span> BẢNG SOI CẦU (BEAD PLATE 60 PHIÊN)
+                </div>
+                <div class="roadmap-stats">
+                    <div class="stat-item stat-tai">🔴 Tài: <span id="statTai">0 (0%)</span></div>
+                    <div class="stat-item stat-xiu">🔵 Xỉu: <span id="statXiu">0 (0%)</span></div>
+                    <div class="stat-item stat-bao">🟡 Bão: <span id="statBao">0</span></div>
+                </div>
+            </div>
+
+            <!-- Khung hạt soi cầu -->
+            <div class="bead-plate" id="beadPlate"></div>
+        </section>
+
+        <!-- LỊCH SỬ CÁC PHIÊN CƯỢC GẦN NHẤT -->
+        <section class="history-section">
+            <h3 class="history-title">📜 Nhật Ký Cược & Lịch Sử Phiên Gần Nhất</h3>
+            <div class="table-responsive">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Phiên</th>
+                            <th>Thời gian</th>
+                            <th>Xúc xắc</th>
+                            <th>Tổng</th>
+                            <th>Kết quả</th>
+                            <th>Đã cược</th>
+                            <th>Thưởng nhận</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal Chi Tiết / Hướng Dẫn / Minh Bạch -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Thông Báo</h3>
+                <button class="btn-close-modal" id="modalClose">&times;</button>
+            </div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- Hộp thông báo Toast -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Nút Mở Khung Chat Trực Tuyến -->
+    <button class="chat-toggle-btn" id="chatToggleBtn">
+        <span>💬</span> Chat Bàn Chơi
+        <span class="unread-badge" id="unreadBadge" style="display:none;"></span>
+    </button>
+
+    <!-- Khung Chat Trực Tuyến Slide-out -->
+    <div class="chat-drawer" id="chatDrawer">
+        <div class="chat-drawer-header">
+            <div class="chat-drawer-title">
+                <span>💬</span> Trò Chuyện Bàn Chơi
+            </div>
+            <button class="chat-close-btn" id="chatCloseBtn">&times;</button>
+        </div>
+        <div class="chat-messages-list" id="chatMessagesList"></div>
+        <div class="quick-emotes-bar">
+            <button class="emote-btn" data-text="🔥 Cầu bệt rồi anh em ơi!">🔥 Cầu bệt</button>
+            <button class="emote-btn" data-text="🔴 Tất tay TÀI nào!">🔴 Đánh Tài</button>
+            <button class="emote-btn" data-text="🔵 XỈU uy tín luôn!">🔵 Đánh Xỉu</button>
+            <button class="emote-btn" data-text="🎲 Nặn đê anh em ơi!">🎲 Nặn đê</button>
+            <button class="emote-btn" data-text="🤣 Cay quá ván sau gỡ!">🤣 Cay quá</button>
+            <button class="emote-btn" data-text="🎉 Ăn to rồi anh em ơi!">🎉 Ăn to</button>
+        </div>
+        <div class="chat-input-bar">
+            <input type="text" id="chatInput" class="chat-input" placeholder="Nhập tin nhắn..." maxlength="100">
+            <button id="chatSendBtn" class="chat-send-btn">➤</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>© Bản quyền thiết kế trò chơi Tài Xỉu Giải Trí Vui Dân Gian. Dữ liệu công khai từ mạng League of Entropy Drand.</p>
+        <p style="margin-top:4px;color:#7f8c8d;">Chỉ dùng cho mục đích giải trí và trải nghiệm xác suất toán học. Nghiêm cấm mọi hành vi cá cược tiền thật.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="audio.js"></script>
+    <script src="drand.js"></script>
+    <script src="game.js"></script>
+    <script src="multiplayer.js"></script>
+</body>
+</html>
