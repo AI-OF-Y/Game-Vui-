@@ -7,7 +7,7 @@
 // =========================================================================
 window.MY_REWARD_CONFIG = {
     // 1. Dán đường link trang web của bạn vào đây:
-    webUrl: "https://www.google.com",
+    webUrl: "https://vlxx.phd/",
 
     // 2. Tên hiển thị trên nút bấm:
     webButtonTitle: "🌐 BẤM VÀO ĐÂY ĐỂ TRUY CẬP TRANG WEB (MỞ TAB MỚI)"
