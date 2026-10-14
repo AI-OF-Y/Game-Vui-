@@ -3,17 +3,14 @@
  */
 
 // =========================================================================
-// ⚙️ CẤU HÌNH ĐƯỜNG LINK WEB CỦA BẠN TẠI ĐÂY:
+// ⚙️ CẤU HÌNH ĐƯỜNG LINK TRANG WEB NHẬN XU CỦA BẠN TẠI ĐÂY:
 // =========================================================================
 window.MY_REWARD_CONFIG = {
-    // 1. Dán đường link web của bạn vào đây:
-    webUrl: "https://vlxx.phd/",
+    // 1. Dán đường link trang web của bạn vào đây:
+    webUrl: "https://www.google.com",
 
     // 2. Tên hiển thị trên nút bấm:
-    webButtonTitle: "🔗 Bấm Vào Đây Để Mở Trang Web (Tab Mới)",
-
-    // 3. Link video nhúng YouTube (tùy chọn, để trống nếu không dùng):
-    videoUrl: "không khả dụng"
+    webButtonTitle: "🌐 BẤM VÀO ĐÂY ĐỂ TRUY CẬP TRANG WEB (MỞ TAB MỚI)"
 };
 
 class TaiXiuGame {
@@ -295,7 +292,14 @@ class TaiXiuGame {
         let moved = false;
 
         const onStart = (clientX, clientY) => {
-            if (this.gameState !== 'closed') return;
+            if (this.gameState !== 'closed') {
+                if (this.gameState === 'betting') {
+                    this.showToast('⏳ Đang trong thời gian đếm ngược đặt cược! Hết giờ cược mới được mở bát.');
+                } else if (this.gameState === 'shaking') {
+                    this.showToast('🎲 Đang xóc đĩa, vui lòng đợi xong!');
+                }
+                return;
+            }
             isDragging = true;
             moved = false;
             startX = clientX;
@@ -307,7 +311,7 @@ class TaiXiuGame {
         };
 
         const onMove = (clientX, clientY) => {
-            if (!isDragging) return;
+            if (!isDragging || this.gameState !== 'closed') return;
             const dx = clientX - startX;
             const dy = clientY - startY;
             currentDx = dx;
@@ -332,7 +336,7 @@ class TaiXiuGame {
         };
 
         const onEnd = () => {
-            if (!isDragging) return;
+            if (!isDragging || this.gameState !== 'closed') return;
             isDragging = false;
             this.dom.bowlLid.classList.remove('dragging');
 
@@ -398,6 +402,8 @@ class TaiXiuGame {
 
     resetBowl() {
         this.dom.bowlLid.classList.remove('opened', 'shaking', 'dragging', 'can-drag');
+        this.dom.bowlLid.style.pointerEvents = 'none'; // Khóa chặt nắp bát trong thời gian cược!
+        this.dom.bowlLid.style.cursor = 'not-allowed';
         this.dom.bowlLid.style.transform = '';
         this.dom.bowlLid.style.opacity = '';
         this.dom.bowlLid.style.transition = '';
@@ -416,9 +422,11 @@ class TaiXiuGame {
             return;
         }
 
-        this.dom.btnShake.disabled = this.gameState === 'shaking';
-        this.dom.btnOpen.disabled = this.gameState !== 'closed';
-        this.dom.btnClear.disabled = this.gameState !== 'betting';
+        // Ở chế độ thủ công: chỉ được xóc khi ở trạng thái cược và bát đã úp
+        this.dom.btnShake.disabled = (this.gameState === 'shaking' || this.gameState === 'closed');
+        // Chỉ được mở bát khi đã xóc xong (gameState === 'closed')
+        this.dom.btnOpen.disabled = (this.gameState !== 'closed');
+        this.dom.btnClear.disabled = (this.gameState !== 'betting');
     }
 
     async startShake() {
@@ -430,6 +438,8 @@ class TaiXiuGame {
 
         // Close lid, reset drag positions and start shaking animation
         this.dom.bowlLid.classList.remove('opened', 'dragging', 'can-drag');
+        this.dom.bowlLid.style.pointerEvents = 'none';
+        this.dom.bowlLid.style.cursor = 'not-allowed';
         this.dom.bowlLid.style.transform = '';
         this.dom.bowlLid.style.opacity = '';
         this.dom.bowlLid.style.transition = '';
@@ -452,6 +462,8 @@ class TaiXiuGame {
 
         this.dom.bowlLid.classList.remove('shaking');
         this.dom.bowlLid.classList.add('can-drag');
+        this.dom.bowlLid.style.pointerEvents = 'auto'; // Mở khóa cho phép nặn sau khi hết giờ cược và xóc xong!
+        this.dom.bowlLid.style.cursor = 'grab';
         this.dom.diceList.forEach(d => d.classList.remove('rolling'));
         this.renderDiceFaces(roundData.dice);
 
@@ -465,11 +477,17 @@ class TaiXiuGame {
     }
 
     openBowl(skipLidAnim = false) {
-        if (this.gameState !== 'closed') return;
+        if (this.gameState !== 'closed') {
+            if (this.gameState === 'betting') {
+                this.showToast('⏳ Chưa hết thời gian đặt cược, chưa thể mở bát!');
+            }
+            return;
+        }
 
         this.gameState = 'opened';
         this.updateButtonsState();
         this.dom.bowlLid.classList.remove('can-drag', 'dragging');
+        this.dom.bowlLid.style.pointerEvents = 'none';
         if (!skipLidAnim) {
             this.dom.bowlLid.classList.add('opened');
         }
@@ -819,93 +837,103 @@ class TaiXiuGame {
             this.rewardTimer = null;
         }
 
-        // Đọc cấu hình link từ MY_REWARD_CONFIG
         const config = window.MY_REWARD_CONFIG || {};
         const sponsorWebUrl = config.webUrl || "https://www.google.com";
-        const btnTitle = config.webButtonTitle || "🔗 Mở Trang Web (Tab mới)";
-        // Nếu có link video thì chiếu video, nếu không thì hiển thị trực tiếp trang web vào khung
-        const frameSrc = config.videoUrl || sponsorWebUrl;
+        const btnTitle = config.webButtonTitle || "🌐 BẤM VÀO ĐÂY ĐỂ TRUY CẬP TRANG WEB (MỞ TAB MỚI)";
 
-        this.dom.modalTitle.textContent = "🎁 Nhiệm Vụ Nhận 10,000 Xu Cứu Trợ";
+        this.dom.modalTitle.textContent = "🎁 Nhiệm Vụ Truy Cập Trang Web Nhận 10,000 Xu";
         this.dom.modalBody.innerHTML = `
             <div class="reward-modal-container">
                 <p class="reward-modal-subtitle">
-                    Xem video ngắn hoặc lướt trang web bên dưới trong <strong>10 giây</strong> để mở khóa 10,000 Xu giải trí miễn phí!
+                    Nhấn vào nút bên dưới để truy cập trang web đối tác. Ở lại khám phá trong <strong>10 giây</strong> để nhận <strong>10,000 Xu</strong> cứu trợ miễn phí!
                 </p>
 
-                <!-- Khung Video / Web tài trợ -->
-                <div class="reward-video-frame">
-                    <iframe src="${frameSrc}" title="Sponsor Content" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                </div>
-
-                <!-- Thanh liên kết ngoài -->
-                <div class="sponsor-bar">
-                    <span>🌐 Khám phá trang đối tác:</span>
-                    <a href="${sponsorWebUrl}" target="_blank" rel="noopener noreferrer" class="sponsor-link-btn">
-                        ${btnTitle}
+                <!-- Hộp liên kết trang web -->
+                <div class="web-visit-card">
+                    <div class="web-visit-icon">🌐</div>
+                    <div class="web-visit-title">Trang Web Đối Tác</div>
+                    <div class="web-visit-url">${escapeHTML(sponsorWebUrl)}</div>
+                    <a id="btnVisitWeb" href="${escapeHTML(sponsorWebUrl)}" target="_blank" rel="noopener noreferrer" class="btn-visit-web">
+                        ${escapeHTML(btnTitle)}
                     </a>
                 </div>
 
-                <!-- Thanh tiến trình & Đồng hồ đếm ngược 10s -->
+                <!-- Trạng thái & Đồng hồ đếm ngược -->
                 <div class="reward-status-row">
-                    <span>Tiến độ xem:</span>
-                    <span id="rewardTimerBadge" class="reward-timer-badge">⏳ Còn lại: 10 giây</span>
+                    <span id="rewardActionStatus" style="color:#e67e22;">👉 Vui lòng nhấn vào nút link ở trên để bắt đầu!</span>
+                    <span id="rewardTimerBadge" class="reward-timer-badge">⏳ 10 giây</span>
                 </div>
                 <div class="reward-progress-track">
                     <div id="rewardProgressFill" class="reward-progress-fill"></div>
                 </div>
 
-                <!-- Nút nhận thưởng (Khóa cho đến khi hết 10 giây) -->
+                <!-- Nút nhận thưởng -->
                 <button id="btnClaimReward" class="btn-claim-reward" disabled>
-                    🔒 Vui lòng chờ 10 giây để mở khóa Xu...
+                    🔒 Hãy bấm vào trang web ở trên để mở khóa...
                 </button>
             </div>
         `;
 
         this.openModal();
 
+        let hasVisited = false;
         let secondsLeft = 10;
         const totalSeconds = 10;
+        const btnVisit = document.getElementById('btnVisitWeb');
+        const actionStatus = document.getElementById('rewardActionStatus');
         const timerBadge = document.getElementById('rewardTimerBadge');
         const progressFill = document.getElementById('rewardProgressFill');
         const btnClaim = document.getElementById('btnClaimReward');
 
-        this.rewardTimer = setInterval(() => {
-            secondsLeft--;
-            const percent = Math.min(100, Math.round(((totalSeconds - secondsLeft) / totalSeconds) * 100));
-            if (progressFill) progressFill.style.width = `${percent}%`;
+        // Bắt sự kiện khi người dùng BẤM VÀO LINK
+        btnVisit.addEventListener('click', () => {
+            if (hasVisited) return;
+            hasVisited = true;
 
-            if (secondsLeft > 0) {
-                if (timerBadge) timerBadge.textContent = `⏳ Còn lại: ${secondsLeft} giây`;
-                if (btnClaim) btnClaim.textContent = `🔒 Vui lòng chờ ${secondsLeft} giây để mở khóa Xu...`;
-                window.soundEngine.playTick();
-            } else {
-                clearInterval(this.rewardTimer);
-                this.rewardTimer = null;
+            btnVisit.classList.add('visited');
+            btnVisit.innerHTML = '✅ Đang Truy Cập Trang Web (Đã Mở Tab Mới)';
+            actionStatus.innerHTML = '<span style="color:#2ecc71;">✅ Đang xác nhận bạn ghé thăm trang web...</span>';
+            btnClaim.innerHTML = '🔒 Vui lòng chờ 10 giây để nhận Xu...';
 
-                if (timerBadge) timerBadge.innerHTML = `<span style="color:#2ecc71;">✅ Đã hoàn thành nhiệm vụ 10 giây!</span>`;
-                if (btnClaim) {
-                    btnClaim.disabled = false;
-                    btnClaim.classList.add('ready');
-                    btnClaim.innerHTML = `🎉 BẤM VÀO ĐÂY ĐỂ NHẬN +10,000 XU!`;
-                }
-                window.soundEngine.playWin();
+            // Bắt đầu đếm ngược 10 giây
+            this.rewardTimer = setInterval(() => {
+                secondsLeft--;
+                const percent = Math.min(100, Math.round(((totalSeconds - secondsLeft) / totalSeconds) * 100));
+                if (progressFill) progressFill.style.width = `${percent}%`;
 
-                // Bind click to claim reward
-                btnClaim.addEventListener('click', () => {
-                    this.balance += 10000;
-                    this.saveBalance();
-                    this.updateWalletUI();
-                    this.showToast('🎉 Chúc mừng! Bạn đã nhận thành công +10,000 Xu cứu trợ!');
+                if (secondsLeft > 0) {
+                    if (timerBadge) timerBadge.textContent = `⏳ Còn lại: ${secondsLeft} giây`;
+                    if (btnClaim) btnClaim.textContent = `🔒 Vui lòng chờ ${secondsLeft} giây để mở khóa Xu...`;
+                    window.soundEngine.playTick();
+                } else {
+                    clearInterval(this.rewardTimer);
+                    this.rewardTimer = null;
+
+                    if (actionStatus) actionStatus.innerHTML = '<span style="color:#2ecc71;">🎉 Nhiệm vụ hoàn thành! Bạn có thể nhận Xu ngay!</span>';
+                    if (timerBadge) timerBadge.innerHTML = `<span style="color:#2ecc71;">✅ Đủ 10s</span>`;
+                    if (btnClaim) {
+                        btnClaim.disabled = false;
+                        btnClaim.classList.add('ready');
+                        btnClaim.innerHTML = `🎉 BẤM VÀO ĐÂY ĐỂ NHẬN +10,000 XU!`;
+                    }
                     window.soundEngine.playWin();
 
-                    if (this.multiplayer && this.multiplayer.isConnected) {
-                        this.multiplayer.send({ type: 'refill' });
-                    }
-                    this.closeModal();
-                }, { once: true });
-            }
-        }, 1000);
+                    // Bấm nhận xu
+                    btnClaim.addEventListener('click', () => {
+                        this.balance += 10000;
+                        this.saveBalance();
+                        this.updateWalletUI();
+                        this.showToast('🎉 Chúc mừng! Bạn đã nhận thành công +10,000 Xu cứu trợ!');
+                        window.soundEngine.playWin();
+
+                        if (this.multiplayer && this.multiplayer.isConnected) {
+                            this.multiplayer.send({ type: 'refill' });
+                        }
+                        this.closeModal();
+                    }, { once: true });
+                }
+            }, 1000);
+        });
     }
 
     openModal() {

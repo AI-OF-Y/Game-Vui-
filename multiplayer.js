@@ -168,6 +168,15 @@ class MultiplayerClient {
                 if (msg.chat_messages) {
                     msg.chat_messages.forEach(c => this.appendChatMessage(c, false));
                 }
+                if (msg.room_state && msg.room_state.phase) {
+                    this.handlePhaseChange({
+                        phase: msg.room_state.phase,
+                        round_id: msg.room_state.round_id,
+                        time_left: msg.room_state.time_left,
+                        dice: msg.room_state.dice,
+                        current_round_data: msg.room_state.current_round_data
+                    });
+                }
                 break;
 
             case 'player_joined':
@@ -235,6 +244,10 @@ class MultiplayerClient {
         if (phase === 'betting') {
             this.game.gameState = 'betting';
             this.game.resetBowl();
+            this.game.dom.bowlLid.style.pointerEvents = 'none'; // KHÓA BÁT TRONG GIỜ CƯỢC
+            this.game.dom.bowlLid.style.cursor = 'not-allowed';
+            this.game.dom.btnShake.disabled = true;
+            this.game.dom.btnOpen.disabled = true;
             this.dom.tableBetTai && (this.dom.tableBetTai.textContent = '0');
             this.dom.tableBetXiu && (this.dom.tableBetXiu.textContent = '0');
             this.game.dom.roundIdText.textContent = `Phiên #${msg.round_id}`;
@@ -244,7 +257,11 @@ class MultiplayerClient {
         } else if (phase === 'shaking') {
             this.game.gameState = 'shaking';
             this.game.clearWinningHighlights();
-            this.game.dom.bowlLid.classList.remove('opened');
+            this.game.dom.bowlLid.classList.remove('opened', 'can-drag', 'dragging');
+            this.game.dom.bowlLid.style.pointerEvents = 'none';
+            this.game.dom.bowlLid.style.cursor = 'not-allowed';
+            this.game.dom.btnShake.disabled = true;
+            this.game.dom.btnOpen.disabled = true;
             this.game.dom.bowlLid.classList.add('shaking');
             this.game.dom.diceList.forEach(d => d.classList.add('rolling'));
             this.game.dom.resultDisplay.innerHTML = '<span style="color:#f5c518;font-weight:700">Đang xóc đĩa & Lấy dữ liệu công khai Drand...</span>';
@@ -253,6 +270,9 @@ class MultiplayerClient {
             this.game.gameState = 'closed';
             this.game.dom.bowlLid.classList.remove('shaking');
             this.game.dom.bowlLid.classList.add('can-drag');
+            this.game.dom.bowlLid.style.pointerEvents = 'auto'; // HẾT THỜI GIAN CƯỢC VÀ XÓC XONG -> MỞ KHÓA CHO PHÉP NẶN!
+            this.game.dom.bowlLid.style.cursor = 'grab';
+            this.game.dom.btnOpen.disabled = false;
             this.game.dom.diceList.forEach(d => d.classList.remove('rolling'));
             if (msg.dice) {
                 this.game.renderDiceFaces(msg.dice);

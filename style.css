@@ -423,20 +423,24 @@ header {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    cursor: grab;
+    cursor: not-allowed;
+    pointer-events: none; /* Khóa chặt nắp bát trong thời gian đếm ngược đặt cược! */
     user-select: none;
     touch-action: none; /* Prevent scroll on touch while dragging */
     will-change: transform;
     transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease;
 }
 
-.bowl-lid.dragging {
-    cursor: grabbing;
-    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.9), inset 0 4px 15px rgba(255, 255, 255, 0.5);
+.bowl-lid.can-drag {
+    cursor: grab;
+    pointer-events: auto; /* Chỉ mở khóa khi hết thời gian đặt cược và vào giai đoạn nặn! */
+    animation: pulseDragHint 1.8s infinite alternate ease-in-out;
 }
 
-.bowl-lid.can-drag {
-    animation: pulseDragHint 1.8s infinite alternate ease-in-out;
+.bowl-lid.dragging {
+    cursor: grabbing;
+    pointer-events: auto;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.9), inset 0 4px 15px rgba(255, 255, 255, 0.5);
 }
 
 @keyframes pulseDragHint {
@@ -1540,4 +1544,74 @@ footer {
 @keyframes claimPulse {
     0% { transform: scale(1); filter: brightness(1); }
     100% { transform: scale(1.02); filter: brightness(1.2); }
+}
+
+/* Website Visit Mission Card Styles */
+.web-visit-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 2px solid rgba(245, 197, 24, 0.4);
+    border-radius: 16px;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.web-visit-icon {
+    font-size: 2.8rem;
+    animation: floatIcon 2.5s infinite ease-in-out;
+}
+
+@keyframes floatIcon {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+.web-visit-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--gold-light);
+}
+
+.web-visit-url {
+    font-size: 0.85rem;
+    color: #3498db;
+    word-break: break-all;
+    font-family: monospace;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px dashed rgba(52, 152, 219, 0.4);
+}
+
+.btn-visit-web {
+    background: linear-gradient(135deg, #e67e22, #d35400);
+    color: #fff;
+    text-decoration: none;
+    padding: 13px 26px;
+    border-radius: 30px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(230, 126, 34, 0.5);
+    transition: all 0.25s ease;
+    cursor: pointer;
+    border: 2px solid #f39c12;
+}
+
+.btn-visit-web:hover {
+    transform: translateY(-2px) scale(1.04);
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+    box-shadow: 0 6px 22px rgba(243, 156, 18, 0.7);
+}
+
+.btn-visit-web.visited {
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+    border-color: #2ecc71;
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.5);
 }
